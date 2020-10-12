@@ -1,0 +1,6 @@
+V1.0 (08.2019): Started the project
+V2.0 (03.2020): Added multiple sending of sensor data with 1 http request,
+		Added example for putting many values on server with 1 http request (008_PUT_many_values),
+		Added example for MKR environmental shield(007_PUT_MKR_ENV_Shield),
+		Added example for RC car (009_PUT_RC_Car)
+v3.0 (10.2020):	Updated Example for RC car
