@@ -22,7 +22,7 @@ Die Sensordaten desDigiPro RC Car können mit dem Beispiel 009_PUT_RC_Car an ein
 
 Dokumentation siehe Schulung Teil 3.
 
-Zur schnellen Einstellungsmöglichkeit von der Wifi Konnektivität (SSID, Passwort) und Thingworxserver (Serveradresse, AppKey) wird die serielle Kommunikation verwendet. Dafür wird das Programm Putty verwendet (Installationsdatei putt074.zip).
+Zur schnellen Einstellungsmöglichkeit der Wifi Konnektivität (SSID, Passwort) und des Thingworxservers (Serveradresse, AppKey) wird die serielle Kommunikation verwendet. Die Software Putty wird dazu verwendet (Installationsdatei putt074.zip).
 
 # Zusatzinfos
 Zusätzliche Infos aus der Sicht der Programmierung/Elektronik befinden sich im Ordner Zusatzinfos.
