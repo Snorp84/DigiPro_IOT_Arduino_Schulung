@@ -5,8 +5,6 @@ Dieses Git Repository wird von Dipl. Ing. Martin Schuber (sum@htlwrn.ac.at) und 
 
 Dieses Git Repository untersteht der GNU GPL v3 Lizenz.
 
-Git Repository Version 1.0.
-
 # Verwendung des Git Repositories
 Zuerst muss die Arduino IDE installiert werden: https://www.arduino.cc/en/Main/software
 
@@ -17,13 +15,15 @@ Beim Öffnen der Arduino IDE befindet sich unter File-->Examples-->ThingworxMKRW
 Auf diese Beispiele wird in der Dokumentation unter Praesentationen_Schulungen eingegangen.
 
 # Dokumentation
-Die DigiPro IOT Schulung ist in 3 Teilen gegliedert. Die Dokumentation zu jeder Schulung befindet sich im Ordner Praesentationen_Schulungen
+Die DigiPro IOT Schulung ist in 3 Teilen gegliedert. Die Dokumentation zu jeder Schulung befindet sich im Ordner Praesentationen_Schulungen.
 
 # DigiPro RC Car
 Die Sensordaten desDigiPro RC Car können mit dem Beispiel 009_PUT_RC_Car an einen Thingworx POD geschickt werden. 
 
 Dokumentation siehe Schulung Teil 3.
 
-#Zusatzinfos
+Zur schnellen Einstellungsmöglichkeit von der Wifi Konnektivität (SSID, Passwort) und Thingworxserver (Serveradresse, AppKey) wird die serielle Kommunikation verwendet. Dafür wird das Programm Putty verwendet (Installationsdatei putt074.zip).
+
+# Zusatzinfos
 Zusätzliche Infos aus der Sicht der Programmierung/Elektronik befinden sich im Ordner Zusatzinfos.
 
