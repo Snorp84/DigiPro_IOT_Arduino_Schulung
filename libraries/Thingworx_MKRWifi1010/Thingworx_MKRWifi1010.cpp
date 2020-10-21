@@ -37,6 +37,14 @@ ThingWorx::ThingWorx(char* server, int port, char* appKey, char* thingName, Stri
   _WifiPWD = WifiPWD;
 }
 
+ThingWorx_MQTT::ThingWorx_MQTT(char* broker, int port, char* topic,char* SSID, char* WifiPWD) {
+	_broker = broker;
+	_port = port;
+	_topic = topic;
+	_SSID = SSID;
+	_WifiPWD = WifiPWD;
+}
+
 void ThingWorx::put(String property, float value) {
   String url = "/Thingworx/Things/";
   String body = "";
@@ -283,4 +291,43 @@ String ThingWorx::create_json(float value_1[], int size) {
 	return json;
 }
 
+void ThingWorx_MQTT::broker_connect(){
+	
+	Serial.print("Attempting to connect to the MQTT broker: ");
+  	Serial.println(_broker);
+
+  if (!mqttClient.connect(_broker, _port)) {
+    Serial.print("MQTT connection failed! Error code = ");
+    Serial.println(mqttClient.connectError());
+	Serial.println("Restart Arduino");
+    while (1);
+  }
+	Serial.println("You're connected to the MQTT broker!");
+  Serial.println();
+}
+
+//void ThingWorx_MQTT::mqtt_publish(String value){
+//	broker_connect();
+//	  // call poll() regularly to allow the library to send MQTT keep alives which
+//  // avoids being disconnected by the broker
+//  mqttClient.poll();
+//
+//  // avoid having delays in loop, we'll use the strategy from BlinkWithoutDelay
+//  // see: File -> Examples -> 02.Digital -> BlinkWithoutDelay for more info
+// // unsigned long currentMillis = millis();
+//  
+// // if (currentMillis - previousMillis >= interval) {
+//    // save the last time a message was sent
+//   // previousMillis = currentMillis;
+//
+//    Serial.print("Sending message to topic: ");
+//    Serial.println(_topic);
+//
+//    // send message, the Print interface can be used to set the message contents
+//    mqttClient.beginMessage(_topic);
+//    mqttClient.print(value);
+//    mqttClient.endMessage();
+//
+//    Serial.println();
+//  }
 

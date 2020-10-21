@@ -17,6 +17,7 @@
 #include "WiFiNINA.h"
 #include "string.h"
 #include <ArduinoJson.h>
+#include <ArduinoMqttClient.h>
 
 class ThingWorx {
 	public:
@@ -34,6 +35,21 @@ class ThingWorx {
 		char* _appKey;
 		char* _thingName;
 		String* _property_list;
+		char* _SSID;
+		char* _WifiPWD;
+};
+
+class ThingWorx_MQTT {
+	public:
+		ThingWorx_MQTT(char* broker, int port, char* topic,char* SSID, char* WifiPWD);
+		void mqtt_publish(String value);
+		void broker_connect();
+		void Wifi();
+		
+	private:
+		char* _broker;
+		int _port;
+		char* _topic;
 		char* _SSID;
 		char* _WifiPWD;
 };
