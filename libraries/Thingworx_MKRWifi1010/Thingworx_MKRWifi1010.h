@@ -20,10 +20,10 @@
 
 class ThingWorx {
 	public:
-		ThingWorx(char* server, int port, char* appKey, char* thingName, String* property_list);
+		ThingWorx(char* server, int port, char* appKey, char* thingName, String* property_list,char* SSID, char* WifiPWD);
 		void put(String property, float value);
 		float getjson(String property);
-    	void Wifi(char* ssid,char* password);
+    	void Wifi();
 		void put_many(float value[], int size);
 		String create_json(float value[], int size);
 
@@ -34,6 +34,8 @@ class ThingWorx {
 		char* _appKey;
 		char* _thingName;
 		String* _property_list;
+		char* _SSID;
+		char* _WifiPWD;
 };
 
 #endif

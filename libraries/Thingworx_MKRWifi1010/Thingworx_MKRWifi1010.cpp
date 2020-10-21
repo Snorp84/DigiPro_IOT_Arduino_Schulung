@@ -27,12 +27,14 @@
 
 #include "Thingworx_MKRWifi1010.h"
 
-ThingWorx::ThingWorx(char* server, int port, char* appKey, char* thingName, String* property_list) {
+ThingWorx::ThingWorx(char* server, int port, char* appKey, char* thingName, String* property_list, char* SSID, char* WifiPWD) {
   _server = server;
   _port = port;
   _appKey = appKey;
   _thingName = thingName;
   _property_list = property_list;
+  _SSID = SSID;
+  _WifiPWD = WifiPWD;
 }
 
 void ThingWorx::put(String property, float value) {
@@ -93,6 +95,8 @@ void ThingWorx::put(String property, float value) {
   else {
     Serial.println("The connection could not be established");
     _client.stop();
+    WiFi.end();
+	Wifi();
   }
 }
 
@@ -161,10 +165,12 @@ float ThingWorx::getjson(String property) {
   else {
     Serial.println("The connection could not be established");
     _client.stop();
+    WiFi.end();
+	Wifi();
   }
 }
 
-void ThingWorx::Wifi(char* ssid,char* password) {
+void ThingWorx::Wifi() {
   
 delay(1000);  //Wait 1 sec for module initialization
 
@@ -178,9 +184,9 @@ delay(1000);  //Wait 1 sec for module initialization
   //Attempt a WiFi connection to desired access point at ssid, password
   while ( WiFi.status() != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
-    Serial.println(ssid);
+    Serial.println(_SSID);
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-    WiFi.begin(ssid, password);
+    WiFi.begin(_SSID, _WifiPWD);
     delay(10000); //Wait 10 secs for establishing connection
   }
   //Print WiFi status
@@ -257,6 +263,12 @@ void ThingWorx::put_many(float value[], int size) {
   else {
     Serial.println("The connection could not be established");
     _client.stop();
+//    if ( WiFi.status() != WL_CONNECTED){
+//    	NVIC_SystemReset();
+//	}
+	WiFi.end();
+	Wifi();
+
   }
 }
 

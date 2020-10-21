@@ -255,7 +255,7 @@ if ((settings.valid == false) || (digitalRead(PIN_SETUP)==LOW)) {
 //**************************************************************************************************************************************************
 //******************************************************* THINGWORX SETUP **************************************************
 //**************************************************************************************************************************************************
-ThingWorx myThing(settings.Server, port, settings.AppKey, thingName, property_list);  //Define Thingworx Class (1 per Thing) 
+ThingWorx myThing(settings.Server, port, settings.AppKey, thingName, property_list,settings.SSID,settings.WifiPWD);  //Define Thingworx Class (1 per Thing) 
 
 
 //**************************************************************************************************************************************************
@@ -266,7 +266,7 @@ void loop() {
 
  //******************************************************* CREATE INTERNET CONNECTION  ******************************************************************* 
   if (flag==0){
-      myThing.Wifi(settings.SSID, settings.WifiPWD); 
+      myThing.Wifi(); 
     flag++;
   }
   
