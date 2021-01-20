@@ -25,7 +25,7 @@ float uvIndex;
 
 
 // Define Thingworx Class (1 per Thing)
-ThingWorx myThing(host, port, appKey, thingName);  
+ThingWorx myThing(host, port, appKey, thingName, property_list,ssid,password );  
 
 void setup() {
   Serial.begin(9600);                              //Serial communications with computer at 9600 bauds for debug purposes
@@ -36,7 +36,7 @@ void setup() {
     while (1);
   }
   
-  myThing.Wifi(ssid, password);                    //Start the Wifi Connection
+  myThing.Wifi();                    //Start the Wifi Connection
 
 }
 
@@ -44,23 +44,26 @@ void loop() {
   if (millis() - lastConnectionTime > TPOST)      //Send request to server every TPOST seconds
   { 
     //Code for the sensor, the value should be stored in the variable "sensorvalue"
-	temperature = ENV.readTemperature();
- 	humidity    = ENV.readHumidity();
+	  temperature = ENV.readTemperature();
+ 	  humidity    = ENV.readHumidity();
   	pressure    = ENV.readPressure();
   	illuminance = ENV.readIlluminance();
   	uva         = ENV.readUVA();
   	uvb         = ENV.readUVB();
   	uvIndex     = ENV.readUVIndex();
 
+    float send_values[]={temperature,humidity,pressure,illuminance,uva,uvb,uvIndex};
+    int sizearray=sizeof(property_list)/sizeof(String);
 
+    myThing.put_many(send_values,sizearray);
     //Send data with PUT Request to Thingworx
-    myThing.put("Temperatur",temperature);
-    myThing.put("Luftfeuchtigkeit",humidity);
-    myThing.put("Luftdruck",pressure);
-    myThing.put("Lichtstaerke",illuminance);
-    myThing.put("UVA",uva);
-    myThing.put("UVB",uvb);
-    myThing.put("UV-Index",uvIndex);
+//    myThing.put("Temperatur",temperature);
+//    myThing.put("Luftfeuchtigkeit",humidity);
+//    myThing.put("Luftdruck",pressure);
+//    myThing.put("Lichtstaerke",illuminance);
+//    myThing.put("UVA",uva);
+//    myThing.put("UVB",uvb);
+//    myThing.put("UV-Index",uvIndex);
     
     lastConnectionTime = millis();               //Refresh last connection time for if 
   }
