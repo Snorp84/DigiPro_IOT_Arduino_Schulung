@@ -1,7 +1,7 @@
 /**********************************************************************************************************
  * Thingworx_MKRWifi1010.cpp - Library for up- and downloading values to/from a Thingworx "Thing" with an Arduino Wifi MKR1010
- * Created by Armin Fischer, Oct 2020
- * Version 3.0
+ * Created by Armin Fischer, Oct 2021
+ * Version 4.0
  * School: HTBLuVA Wiener Neustadt
  * E-Mail: fia@htlwrn.ac.at
  * 

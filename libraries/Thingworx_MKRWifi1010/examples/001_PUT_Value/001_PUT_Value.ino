@@ -14,7 +14,7 @@ PLEASE DEFINE ALL VARIABLES IN THE "Thingworx_MKRWifi1010_Variable.h" FILE
 #include "Thingworx_MKRWifi1010_Variable.h"
 
 // Define Thingworx Class (1 per Thing)
-ThingWorx myThing(host, port, appKey, thingName);  
+ThingWorx myThing(host, port, appKey, thingName, property_list, ssid, password);  
 
 //Definition variables
 float sensor_value=20.5;
@@ -22,14 +22,14 @@ float sensor_value=20.5;
 void setup() {
   
   Serial.begin(9600);                              //Serial communications with computer at 9600 bauds for debug purposes
-  myThing.Wifi(ssid, password);                    //Start the Wifi Connection
+  myThing.Wifi();                                  //Start the Wifi Connection
 
 }
 
 void loop() {
   if (millis() - lastConnectionTime > TPOST)      //Send request to server every TPOST seconds
   {  
-    myThing.put("BME280_TEMP2",sensor_value); //Send values to server platform
+    myThing.put("Sensorwert1",sensor_value); //Send values to server platform
     
     lastConnectionTime = millis();               //Refresh last connection time for if 
   }

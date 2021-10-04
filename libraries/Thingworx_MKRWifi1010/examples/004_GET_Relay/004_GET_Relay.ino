@@ -14,7 +14,8 @@ PLEASE DEFINE ALL VARIABLES IN THE "Thingworx_MKR1000_Variable.h" FILE
 #include "Thingworx_MKRWifi1010_Variable.h"
 
 // Define Thingworx Class (1 per Thing)
-ThingWorx myThing(host, port, appKey, thingName); 
+ThingWorx myThing(host, port, appKey, thingName, property_list, ssid, password);  
+
 
 //Relay 1 is on pin 1, relay 2 is on pin 2
 #define RELAY_1 1
@@ -22,7 +23,7 @@ ThingWorx myThing(host, port, appKey, thingName);
 
 void setup() {
   Serial.begin(9600);                             //Serial communications with computer at 9600 bauds for debug purposes
-  myThing.Wifi(ssid, password);                   //Start the Wifi Connection
+  myThing.Wifi();                   //Start the Wifi Connection
   pinMode(RELAY_1,OUTPUT);                        //Digital pin 1 is an output pin
   pinMode(RELAY_2,OUTPUT);                        //Digital pin 2 is an output pin
 

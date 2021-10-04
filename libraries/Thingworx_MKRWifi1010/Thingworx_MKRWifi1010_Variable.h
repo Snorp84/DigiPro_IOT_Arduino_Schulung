@@ -1,7 +1,7 @@
 /**********************************************************************************************************
  * Thingworx_MKRWifi1010_Variable.h - Definition of variables, which are used with the "Thingworx_MKRWifi1010.h" library
- * Created by Armin Fischer, Oct 2020
- * Version 3.0
+ * Created by Armin Fischer, Oct 2021
+ * Version 4.0
  * School: HTBLuVA Wiener Neustadt
  * E-Mail: fia@htlwrn.ac.at
 ************************************************************************************************************/

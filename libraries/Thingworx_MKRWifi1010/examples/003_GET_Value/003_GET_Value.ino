@@ -14,14 +14,15 @@ PLEASE DEFINE ALL VARIABLES IN THE "Thingworx_MKRWifi1010_Variable.h" FILE
 #include "Thingworx_MKRWifi1010_Variable.h"
 
 // Define Thingworx Class (1 per Thing)
-ThingWorx myThing(host, port, appKey, thingName); 
+ThingWorx myThing(host, port, appKey, thingName, property_list, ssid, password);  
+
 
 //Variable for Sensor Values
 float sensor_1;
 
 void setup() {
   Serial.begin(9600);                              //Serial communications with computer at 9600 bauds for debug purposes
-  myThing.Wifi(ssid, password);                    //Start the Wifi Connection
+  myThing.Wifi();                    //Start the Wifi Connection
 
 }
 
