@@ -1,10 +1,11 @@
 /*
   Code for the DigiPro RC car to read all sensors:
   Temperature, Humidity, RPM, Current, Distance, Gyroscope
-  The sensordata is sent to the Thingworx cloud.
+  The sensordata is sent to MQTT Server.
 
+  V 1.1
   
-  Created by Martin Schubert and Armin Fischer, DEC 2020.
+  Created by Martin Schubert and Armin Fischer, Oct 2021.
   School: HTBLuVA Wiener Neustadt
   E-Mail: sum@htlwrn.ac.at and fia@htlwrn.ac.at
 */
@@ -46,13 +47,14 @@
 //********************************************************************************************************************************************************
 
 //******************************************************* MQTT  **************************************************
-#define MQTT_USER ""
-#define MQTT_PASS ""
-#define MQTT_SUB ""
-#define MQTT_PUB ""
-#define MQTT_ClientID "" // must be unique - dont use twice on same broker!
+
+#define MQTT_SUB "/cmd/#"     // apended to given topic
+#define MQTT_PUB "/data"      // apended to given topic
+
 char mqttData [300];
 String property_list[]={"Temp","Hum","Rpm","Current","Dist","Pitch","Roll","Acc_x","Acc_y","Acc_z","Gyro_x","Gyro_y","Gyro_z"};
+String mqtt_sub;
+String mqtt_pub;
 
 //******************************************************* FLASH SETUP  **************************************************
 typedef struct {
@@ -61,6 +63,9 @@ typedef struct {
   char Port[10];
   char SSID[20];
   char WifiPWD[20];
+  char Topic[60];
+  char User [20];
+  char Pass [20];
 } userData;
 FlashStorage(flash_store,userData); // Reserve a portion of flash memory to store a userData
 userData settings;                  //Create struct to save settings from serial input
@@ -180,7 +185,7 @@ void setup() {
 
     Wire.requestFrom(MPU, 1);
     x = Wire.read(); //the value of Register-27 is in x
-    x = x | 0b00010000;     //appending values of Bit4 and Bit3 --> FS_SEL = 1 (+/- 500°/sec)
+    x = x | 0b00010000;     //appending values of Bit4 and Bit3 --> FS_SEL = 1 (+/- 500Â°/sec)
     
     Wire.beginTransmission(MPU);
     Wire.write(0x1B);
@@ -212,39 +217,56 @@ if ((settings.valid == false) || (digitalRead(PIN_SETUP)==LOW)) {
     while (!Serial) {}
     Serial.println("***********************************************************");
     Serial.println("*                                                         *");
-    Serial.println("* DigiPro RC-Car Connection Setup (c) 2020 FIASUM         *");
+    Serial.println("* DigiPro RC-Car MQTT Connection Setup (c) 2021 FIASUM    *");
     Serial.println("*                                                         *");
     Serial.println("* ATTENTION use PUTTY or KITTY                            *");
     Serial.println("* --> to see entered chars turn on echo!!!                *");
     Serial.println("* --> confirm every value with <ENTER>                    *");
-    Serial.println("*                                                         *");
+    Serial.println("* --> backspace and del ar not supported                  *");
     Serial.println("***********************************************************\n\n");    
+    Serial.println("* Topic for subscription will get */cmd/#                 *");
+    Serial.println("* Topic for publish will get */data                       *");
+    Serial.println("* --> Example: Topic entered is edu/iot2021               *");
+    Serial.println("*       --> subscription will be edu/iot2021/cmd/#        *");
+    Serial.println("*       --> publish will be edu/iot2021/data              *");
+    Serial.println("***********************************************************\n\n"); 
 
-    
+  //  #define MQTT_SUB "/cmd/#"
+//#define MQTT_PUB "/data"
 
-    Serial.println("Insert Broker IP Adress:");
-    String Broker = Serial.readStringUntil('\r');
-    Serial.println();
-    Serial.println("Insert Port:");
-    String Port = Serial.readStringUntil('\r');
-    Serial.println();
-    //Serial.println("Insert Topic:");
-    //String Topic = Serial.readStringUntil('\t');
     Serial.println("Insert SSID:");
     String SSID = Serial.readStringUntil('\r');
     Serial.println();
     Serial.println("Insert Wifi Password:");
     String wifiPWD = Serial.readStringUntil('\r');
     Serial.println();
-    
-    
+    Serial.println("Insert Broker:");
+    String Broker = Serial.readStringUntil('\r');
+    Serial.println();
+    Serial.println("Insert Port:");
+    String Port = Serial.readStringUntil('\r');
+    Serial.println();
+    Serial.println("Insert MQTT-Topic:");
+    String Topic = Serial.readStringUntil('\r');
+    Serial.println();
+    Serial.println("Insert MQTT-User:");
+    String User = Serial.readStringUntil('\r');
+    Serial.println();
+    Serial.println("Insert MQTT-Pass:");
+    String Pass = Serial.readStringUntil('\r');
+    Serial.println();
+    //mqtt_sub = MQTT_SUB;
+    //mqtt_sub += Topic;
+    //mqtt_pub = Topic + MQTT_PUB;
     // Fill the "settings" structure with the data entered by the user...
 
     SSID.toCharArray(settings.SSID, SSID.length()+2);                 
     wifiPWD.toCharArray(settings.WifiPWD, wifiPWD.length()+2);
     Broker.toCharArray(settings.Broker, Broker.length()+2);
     Port.toCharArray(settings.Port, Port.length()+2);
-    //Topic.toCharArray(settings.Topic, Topic.length()+2);
+    Topic.toCharArray(settings.Topic, Topic.length()+2);
+    User.toCharArray(settings.User, User.length()+2);
+    Pass.toCharArray(settings.Pass, Pass.length()+2);
 
     // set "valid" to true, so the next time we know that we have valid data inside
     settings.valid = true;
@@ -254,36 +276,48 @@ if ((settings.valid == false) || (digitalRead(PIN_SETUP)==LOW)) {
     // Print a confirmation of the data inserted.
     Serial.println();
     Serial.println("Settings stored ! \n");
+    delay (1000);
 
-    Serial.print("Broker: |");
-    Serial.print(settings.Broker);
-    Serial.println("|");
-    Serial.print("Port: |");
-    Serial.print(settings.Port);
-    Serial.println("|");
-    //Serial.print("Topic: |");
-    //Serial.print(settings.Topic);
-    //Serial.println("|");
+
+  } 
+  
+  setLEDColor(0,255,0);
+  
     Serial.print("SSID: |");
     Serial.print(settings.SSID);
     Serial.println("|");
     Serial.print("WifiPWD: |");
     Serial.print(settings.WifiPWD);
     Serial.println("|");
-  } 
+    Serial.print("Broker: |");
+    Serial.print(settings.Broker);
+    Serial.println("|");
+    Serial.print("Port: |");
+    Serial.print(settings.Port);
+    Serial.println("|");
+    Serial.print("Topic: |");
+    Serial.print(settings.Topic);
+    Serial.println("|");
+    Serial.print("MQTT-Topic: |");
+    Serial.print(settings.User);
+    Serial.println("|");
+    Serial.print("MQTT-Pass: |");
+    Serial.print(settings.Pass);
+    Serial.println("|");
   
-  setLEDColor(0,255,0);
-  
+  // create topics for pub and sub
+  mqtt_sub = String(settings.Topic)  + MQTT_SUB;
+  mqtt_pub = String(settings.Topic) + MQTT_PUB;
   
   mqttClient.setBufferSize (1024);                // Standard is only 128 !
   mqttClient.setServer(settings.Broker,atoi(settings.Port));
   mqttClient.setCallback(mqtt_callback);
+  // reconnect();
 
 
-
-
+//******************************************************* CREATE INTERNET CONNECTION  ******************************************************************* 
       delay(1000);  //Wait 1 sec for module initialization
-
+      //Attempt a WiFi connection to desired access point at ssid, password
      
   
 
@@ -293,8 +327,7 @@ if ((settings.valid == false) || (digitalRead(PIN_SETUP)==LOW)) {
 }
 
 void loop() {
-  
-//******************************************************* CREATE INTERNET CONNECTION  *******************************************************************    
+    
     if (flag==0){
       delay(1000);  //Wait 1 sec for module initialization
 
@@ -325,25 +358,35 @@ void loop() {
 
       if (WiFi.status() == WL_CONNECTED) {
       flag = true;
-    } else {
-      WiFi.end();
-
-    }
-  } else if (flag && WiFi.status() != WL_CONNECTED) {
-    WiFi.end();
-    flag = false;
+      } else {
+          WiFi.end();
+          }
+     
+      } else if (flag && WiFi.status() != WL_CONNECTED) {
+        WiFi.end();
+        flag = false;
     
-  }
-//******************************************************* CREATE CONNECTION TO MQTT BROKER  ******************************************************************* 
-
-    while (!mqttClient.connected() && flag==true) {
+      
+    }
+    //delay (2000);
+    while (!mqttClient.connected()) {
       mqttClient.disconnect();
         Serial.print("Attempting MQTT connection...");
-                                  // generate unique clientname (int64_t)WiFi.macAddress() ;
-        if (mqttClient.connect(MQTT_ClientID, MQTT_USER, MQTT_PASS)) {
+                                  // generate unique clientname (int64_t)WiFi.macAddress() - doesnt work on WifiNina;
+        byte mac[6];
+        char str[10];
+         WiFi.macAddress(mac);
+         sprintf(str,"%d",mac);
+       
+        if (mqttClient.connect( str , settings.User, settings.Pass)) {
+
+        //if (mqttClient.connect(MQTT_ClientID, settings.User, settings.Pass)) {
           Serial.println("connected");
+          Serial.println(str);
           delay (1000);
-          mqttClient.subscribe(MQTT_SUB);
+          //"Message arrived: topic: " + String(topic)
+           //mqttClient.subscribe()
+          mqttClient.subscribe(mqtt_sub.c_str());
         } else {
             Serial.print("failed, rc=");
             Serial.print(mqttClient.state());
@@ -361,6 +404,10 @@ void loop() {
       mqttClient.loop();
   if (currentMillis - previousMillis >= interval) {
     // save the last time a message was sent
+    flag = !flag;
+   //setLEDColor(0,255,0); // turn LED to Green
+    if (flag) setLEDColor(0,0,255);
+    else setLEDColor(0,255,0);
     previousMillis = currentMillis;
 
 
@@ -380,7 +427,7 @@ void loop() {
 //******************************************************* GYROSCOPE  *******************************************************************
     gyro();
 
-//******************************************************* CREATE JSON STRING  *******************************************************************
+//******************************************************* SENDING DATA TO MQTT-Broker  *******************************************************************
     float send_values[]={sens_dht_temp,sens_dht_hum,sens_rpm_value,sens_analog_value,distance,pitch,roll,AcX,AcY,AcZ,GyX,GyY,GyZ};
     int sizearray=sizeof(property_list)/sizeof(String);
 
@@ -391,16 +438,18 @@ void loop() {
   }
   serializeJson(doc, json);
   
-//******************************************************* SEND JSON TO MQTT BROKER  *******************************************************************
+
     Serial.print("Sending message: ");
     // Serial.println(settings.Topic);
     Serial.println(json);
 
+    // send message, the Print interface can be used to set the message contents
+
     json.toCharArray(mqttData, json.length()+1);
 
     setLEDColor(0,0,255);
-    mqttClient.publish(MQTT_PUB,mqttData);
-    setLEDColor(0,255,0);
+    mqttClient.publish(mqtt_pub.c_str(),mqttData);
+    //setLEDColor(0,255,0);
   }
 }
 
@@ -412,7 +461,7 @@ void loop() {
 void mqtt_callback(char* topic, byte* payload, unsigned int length){
 
  int i = 0;
- // Hilfsvariablen für die Convertierung der Nachricht in ein String
+ // Hilfsvariablen fÃ¼r die Convertierung der Nachricht in ein String
  char message_buff[300];
  
  Serial.println("Message arrived: topic: " + String(topic));
@@ -548,7 +597,7 @@ AcZ=((float)(int16_t)(Wire.read()<<8|Wire.read())/2048) + AccErrorZ;
 
 Wire.read()<<8|Wire.read(); // Not used - Temperature
 
-//read gyro data & apply correction (FS_SEL ist set to 1  +/- 500 °/sec)
+//read gyro data & apply correction (FS_SEL ist set to 1  +/- 500 Â°/sec)
 GyX=(float)(int16_t)(Wire.read()<<8|Wire.read())/65.5;
 GyY=(float)(int16_t)(Wire.read()<<8|Wire.read())/65.5;
 GyZ=(float)(int16_t)(Wire.read()<<8|Wire.read())/65.5;
@@ -603,7 +652,54 @@ void gyro_calibrate(){
 //******************************************************* SET LED COLOUR  *******************************************************************
 void setLEDColor(uint8_t R, uint8_t G, uint8_t B){
   //R, G, and B values should not exceed 255 or be lower than 0.
+  //set ESP32 wifi module RGB led color
   WiFiDrv::analogWrite(RED_LED_pin, R); //Red
   WiFiDrv::analogWrite(GREEN_LED_pin, G); //Green
   WiFiDrv::analogWrite(BLUE_LED_pin, B);  //Blue
 }
+
+/*
+void reconnect(){
+  
+   while ( WiFi.status() != WL_CONNECTED) {
+        Serial.print("Attempting to connect to SSID: ");
+        Serial.println(settings.SSID);
+        WiFi.end();
+        WiFi.begin(settings.SSID, settings.WifiPWD);
+        delay(5000); //Wait 10 secs for establishing connection
+      }
+      //Print WiFi status
+      //Print SSID name
+      Serial.print("SSID: ");
+      Serial.println(WiFi.SSID());
+
+      //Print ipv4 assigned to WiFi101 module
+      IPAddress ip = WiFi.localIP();
+      Serial.print("IP Address: ");
+      Serial.println(ip);
+  
+      //Print signal strength for WiFi101 module
+      long rssi = WiFi.RSSI();
+      Serial.print("Signal strength (RSSI):");
+      Serial.print(rssi);
+      Serial.println(" dBm");
+      delay (5000);
+
+  while (!mqttClient.connected()) {
+        Serial.print("Attempting MQTT connection...");
+                                  // generate unique clientname (int64_t)WiFi.macAddress() ;
+        if (mqttClient.connect(MQTT_ClientID, MQTT_USER, MQTT_PASS)) {
+          Serial.println("connected");
+          delay (1000);
+          mqttClient.subscribe(MQTT_SUB);
+        } else {
+            Serial.print("failed, rc=");
+            Serial.print(mqttClient.state());
+            Serial.println(" try again in 5 seconds");
+            // Wait 5 seconds before retrying
+            delay(5000);
+        }
+      }
+ 
+}
+*/

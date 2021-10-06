@@ -5,3 +5,4 @@ V2.0 (03.2020): Added multiple sending of sensor data with 1 http request,
 		Added example for RC car (009_PUT_RC_Car)
 v3.0 (10.2020):	Updated Example for RC car
 v4.0 (10.2021): Updated Example 1-4 for the usage of Arduino MKR1010 (former code was written for MKR1000)
+		Example 10_RC Car: Eingabe mit Putty erweitert (Topic, User, Passwort für MQTT), Eindeutige MQTT Client-ID aus MAC Adresse generiert
