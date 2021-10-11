@@ -46,6 +46,9 @@
 //******************************************************* VARIABLES AND SETUP FOR SENSORS AND FUNCTIONS **************************************************************************************
 //********************************************************************************************************************************************************
 
+//******************************************************* Random Client ID  **************************************
+char Client_ID [20];
+
 //******************************************************* MQTT  **************************************************
 
 #define MQTT_SUB "/cmd/#"     // apended to given topic
@@ -66,6 +69,7 @@ typedef struct {
   char Topic[60];
   char User [20];
   char Pass [20];
+  char Client_ID [20];
 } userData;
 FlashStorage(flash_store,userData); // Reserve a portion of flash memory to store a userData
 userData settings;                  //Create struct to save settings from serial input
@@ -136,6 +140,8 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length);
 
 //
 void reconnect();
+// *********************************For Serial-Input
+String GetTerminalText();
 
 //***********************************************************************************************************************************************************
 //******************************************************* VOID SETUP - SETUP YOUR ARDUINO *******************************************************************
@@ -221,8 +227,8 @@ if ((settings.valid == false) || (digitalRead(PIN_SETUP)==LOW)) {
     Serial.println("*                                                         *");
     Serial.println("* ATTENTION use PUTTY or KITTY                            *");
     Serial.println("* --> to see entered chars turn on echo!!!                *");
-    Serial.println("* --> confirm every value with <ENTER>                    *");
-    Serial.println("* --> backspace and del ar not supported                  *");
+   // Serial.println("* --> confirm every value with <ENTER>                    *");
+   // Serial.println("* --> backspace and del ar not supported                  *");
     Serial.println("***********************************************************\n\n");    
     Serial.println("* Topic for subscription will get */cmd/#                 *");
     Serial.println("* Topic for publish will get */data                       *");
@@ -235,25 +241,35 @@ if ((settings.valid == false) || (digitalRead(PIN_SETUP)==LOW)) {
 //#define MQTT_PUB "/data"
 
     Serial.println("Insert SSID:");
-    String SSID = Serial.readStringUntil('\r');
+    String SSID = GetTerminalText();
+    //String SSID = Serial.readStringUntil('\r');
     Serial.println();
     Serial.println("Insert Wifi Password:");
-    String wifiPWD = Serial.readStringUntil('\r');
+    String wifiPWD = GetTerminalText();
+    //String wifiPWD = Serial.readStringUntil('\r');
     Serial.println();
     Serial.println("Insert Broker:");
-    String Broker = Serial.readStringUntil('\r');
+    String Broker = GetTerminalText();
+    //String Broker = Serial.readStringUntil('\r');
     Serial.println();
     Serial.println("Insert Port:");
-    String Port = Serial.readStringUntil('\r');
+    String Port = GetTerminalText();
+    //String Port = Serial.readStringUntil('\r');
     Serial.println();
     Serial.println("Insert MQTT-Topic:");
-    String Topic = Serial.readStringUntil('\r');
+    String Topic = GetTerminalText();
+    //String Topic = Serial.readStringUntil('\r');
     Serial.println();
     Serial.println("Insert MQTT-User:");
-    String User = Serial.readStringUntil('\r');
+    String User = GetTerminalText();
+    //String User = Serial.readStringUntil('\r');
     Serial.println();
     Serial.println("Insert MQTT-Pass:");
-    String Pass = Serial.readStringUntil('\r');
+    String Pass = GetTerminalText();
+    //String Pass = Serial.readStringUntil('\r');
+Serial.println();
+    Serial.println("Insert MQTT-Client_ID:");
+    String Client_ID = GetTerminalText();    
     Serial.println();
     //mqtt_sub = MQTT_SUB;
     //mqtt_sub += Topic;
@@ -267,6 +283,7 @@ if ((settings.valid == false) || (digitalRead(PIN_SETUP)==LOW)) {
     Topic.toCharArray(settings.Topic, Topic.length()+2);
     User.toCharArray(settings.User, User.length()+2);
     Pass.toCharArray(settings.Pass, Pass.length()+2);
+    Client_ID.toCharArray(settings.Client_ID, Client_ID.length()+2);
 
     // set "valid" to true, so the next time we know that we have valid data inside
     settings.valid = true;
@@ -280,6 +297,8 @@ if ((settings.valid == false) || (digitalRead(PIN_SETUP)==LOW)) {
 
 
   } 
+
+  delay(2000);
   
   setLEDColor(0,255,0);
   
@@ -298,11 +317,14 @@ if ((settings.valid == false) || (digitalRead(PIN_SETUP)==LOW)) {
     Serial.print("Topic: |");
     Serial.print(settings.Topic);
     Serial.println("|");
-    Serial.print("MQTT-Topic: |");
+    Serial.print("MQTT-User: |");
     Serial.print(settings.User);
     Serial.println("|");
     Serial.print("MQTT-Pass: |");
     Serial.print(settings.Pass);
+    Serial.println("|");
+    Serial.print("MQTT-Client_ID: |");
+    Serial.print(settings.Client_ID);
     Serial.println("|");
   
   // create topics for pub and sub
@@ -347,6 +369,7 @@ void loop() {
 
       //Print ipv4 assigned to WiFi101 module
       IPAddress ip = WiFi.localIP();
+      
       Serial.print("IP Address: ");
       Serial.println(ip);
   
@@ -372,17 +395,25 @@ void loop() {
     while (!mqttClient.connected()) {
       mqttClient.disconnect();
         Serial.print("Attempting MQTT connection...");
-                                  // generate unique clientname (int64_t)WiFi.macAddress() - doesnt work on WifiNina;
-        byte mac[6];
-        char str[10];
+        // generate unique clientname (int64_t)WiFi.macAddress() - doesnt work on WifiNina;
+        /*byte mac[6];
+        char str[12];
          WiFi.macAddress(mac);
-         sprintf(str,"%d",mac);
-       
-        if (mqttClient.connect( str , settings.User, settings.Pass)) {
+         for (int i=0;i<6;i++) {
+           str[i*2]=(char)mac[i];
+         }
+         
+         //sprintf(str,"%d",mac); */
+         //Client_ID = "kashaskdh";
+
+
+       if (mqttClient.connect ( settings.Client_ID , settings.User, settings.Pass)) {
+ //       if (mqttClient.connect( str , settings.User, settings.Pass)) {
 
         //if (mqttClient.connect(MQTT_ClientID, settings.User, settings.Pass)) {
-          Serial.println("connected");
-          Serial.println(str);
+          Serial.println("Connected to MQTT-Server!");
+
+
           delay (1000);
           //"Message arrived: topic: " + String(topic)
            //mqttClient.subscribe()
@@ -657,6 +688,34 @@ void setLEDColor(uint8_t R, uint8_t G, uint8_t B){
   WiFiDrv::analogWrite(GREEN_LED_pin, G); //Green
   WiFiDrv::analogWrite(BLUE_LED_pin, B);  //Blue
 }
+
+//******************************************************* Enable Editing during serial connection  *******************************************************************
+// Thanks to Izaak Martin !
+String GetTerminalText() {
+  unsigned int RetPressed = 0;
+  String InString;
+  while (RetPressed == 0) {
+    if (Serial.available()) {
+      int InCharInt = Serial.read();
+      if (InCharInt != 13) { // Return not pressed
+        if (InCharInt != 127) { // Backspace not pressed
+          char InChar = char(InCharInt);
+          Serial.print(InChar);
+          InString += InChar;
+        } else { // Backspace pressed
+          Serial.print(char(127));
+          int InStringLength = InString.length();
+          InString.remove(InStringLength - 1);
+        }
+      } else { // Return pressed
+        RetPressed = 1;
+      }
+    }
+  }
+  return (InString);
+}
+
+
 
 /*
 void reconnect(){
