@@ -67,6 +67,16 @@ int position_servo2;
 int val_joystick_x;
 int val_joystick_y;
 
+bool joy_oben;
+bool joy_unten;
+bool joy_links;
+bool joy_rechts;
+bool joy_mittig;
+bool joy_pressed;
+
+int joy_limit_upper=1000;
+int joy_limit_lower=50;
+
 
 //******************************************************* MQTT  **************************************************
 
@@ -74,7 +84,7 @@ int val_joystick_y;
 #define MQTT_PUB "/data"      // apended to given topic
 
 char mqttData [300];
-String property_list[]={"Servo1","Servo2"};
+String property_list[]={"Servo1","Servo2","links","rechts","oben","unten","mittig"};
 String mqtt_sub;
 String mqtt_pub;
 
@@ -402,7 +412,32 @@ void loop() {
     servo1.write(position_servo1);
     servo2.write(position_servo2);
 
+//Create digital Signals from Controller position
 
+if (val_joystick_x>= joy_limit_upper)
+  joy_oben=1;
+else
+  joy_oben=0;
+
+if (val_joystick_x<= joy_limit_lower)
+  joy_unten=1;
+else
+  joy_unten=0;
+
+if (val_joystick_y>= joy_limit_upper)
+  joy_rechts=1;
+else
+  joy_rechts=0;
+
+if (val_joystick_y<= joy_limit_lower)
+  joy_links=1;
+else
+  joy_links=0;
+
+if (joy_links==0 && joy_rechts==0 && joy_oben==0 && joy_unten==0)
+  joy_mittig=1;
+else
+  joy_mittig=0;
 //******************************************************* SENDING DATA TO MQTT-Broker  *******************************************************************
     
   currentMillis = millis();
@@ -410,7 +445,7 @@ if (currentMillis - MQTT_previousMillis >= MQTT_intervall) {
     
     
     
-    float send_values[]={position_servo1,position_servo2};
+    float send_values[]={position_servo1,position_servo2,joy_links,joy_rechts,joy_oben,joy_unten,joy_mittig,joy_pressed};
     int sizearray=sizeof(property_list)/sizeof(String);
 
 
