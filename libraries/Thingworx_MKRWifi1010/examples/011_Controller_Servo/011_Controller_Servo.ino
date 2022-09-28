@@ -2,8 +2,10 @@
   Code for the Controller and Servo example:
   The position of the servo can be controlled with a Controller. 
   The data of the controller can also be used to navigate an AR drone.
-  The sensordata is sent to a MQTT Server.
-
+  The sensordata is sent to a MQTT Server:
+  Servo1 = analogue y-Axis Data of controller from 0-180 
+  Servo2 = analogue x-Axis Data of controller from 0-180 
+  links,rechts,oben,unten,mittig = digital Data of controller
   V 1.0
   
   Created by Martin Schubert and Armin Fischer, Sept 2022.
