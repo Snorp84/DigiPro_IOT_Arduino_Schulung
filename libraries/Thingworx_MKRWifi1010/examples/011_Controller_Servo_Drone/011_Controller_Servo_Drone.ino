@@ -513,11 +513,11 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length){
  message_buff[i] = '\0';
  
 
-  if (strstr(topic,"pos_servo1")){     //Servo1
+  if (strstr(topic,"Servo1")){     //Servo1
       position_servo1 = atoi(message_buff);
       // servo1.write(atoi(message_buff));
   }
-  if (strstr(topic,"pos_servo2")){     //Servo2
+  if (strstr(topic,"Servo2")){     //Servo2
       position_servo2 = atoi(message_buff);
       // servo2.write(atoi(message_buff));
   }
